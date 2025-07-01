@@ -269,6 +269,18 @@
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
         }
 
+        .debug-log {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+        }
+
         /* Responsive Design */
         @media (max-width: 480px) {
             .container {
@@ -385,24 +397,34 @@
                 <span id="stopBtnText">緊急停止</span>
             </button>
         </div>
+
+        <!-- デバッグ用ログ表示 -->
+        <div class="debug-log" id="debugLog" style="display: none;">
+            <div><strong>デバッグログ:</strong></div>
+            <div id="logContent"></div>
+        </div>
     </div>
 
     <script>
         class RobotController {
             constructor() {
                 this.device = null;
-                this.characteristic = null;
+                this.characteristicTX = null;
+                this.characteristicRX = null;
                 this.isConnected = false;
                 this.isPaused = false;
                 this.isProcessing = false;
                 
+                // 修正: UUID設定をArduinoと一致させる
                 this.serviceUUID = '12345678-1234-1234-1234-123456789abc';
-                this.characteristicUUID = '87654321-4321-4321-4321-cba987654321';
+                this.characteristicTXUUID = '87654321-4321-4321-4321-cba987654321';
+                this.characteristicRXUUID = '87654321-4321-4321-4321-cba987654322';
                 this.deviceName = 'StamPLC-MRC01';
                 
                 this.initializeElements();
                 this.setupEventListeners();
                 this.checkBluetoothSupport();
+                this.setupDebugMode();
             }
 
             initializeElements() {
@@ -418,7 +440,9 @@
                     pauseBtn: document.getElementById('pauseBtn'),
                     pauseBtnText: document.getElementById('pauseBtnText'),
                     stopBtn: document.getElementById('stopBtn'),
-                    stopBtnText: document.getElementById('stopBtnText')
+                    stopBtnText: document.getElementById('stopBtnText'),
+                    debugLog: document.getElementById('debugLog'),
+                    logContent: document.getElementById('logContent')
                 };
             }
 
@@ -444,11 +468,30 @@
                 });
             }
 
+            setupDebugMode() {
+                // URLにdebug=1がある場合、デバッグモードを有効化
+                if (window.location.search.includes('debug=1')) {
+                    this.elements.debugLog.style.display = 'block';
+                    this.debugMode = true;
+                    this.log('デバッグモード有効');
+                }
+            }
+
+            log(message) {
+                if (this.debugMode) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    this.elements.logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+                    this.elements.logContent.scrollTop = this.elements.logContent.scrollHeight;
+                }
+                console.log(`[RobotController] ${message}`);
+            }
+
             checkBluetoothSupport() {
                 if (!navigator.bluetooth) {
                     this.updateStatus('error', 'このブラウザはWeb Bluetoothをサポートしていません');
                     this.elements.bleBtn.disabled = true;
                     this.elements.bleBtnText.textContent = '非対応';
+                    this.log('Web Bluetooth非対応');
                 }
             }
 
@@ -488,33 +531,60 @@
                     this.elements.bleBtn.classList.add('connecting');
                     this.elements.bleBtnText.innerHTML = '<span class="loading-spinner"></span>接続中...';
                     this.elements.bleBtn.disabled = true;
+                    this.log('BLE接続開始');
 
-                    // BLEデバイス検索
-                    this.device = await navigator.bluetooth.requestDevice({
-                        filters: [{ name: this.deviceName }],
+                    // 修正: より広範囲な検索オプション
+                    const options = {
+                        filters: [
+                            { name: this.deviceName },
+                            { namePrefix: 'StamPLC' },
+                            { namePrefix: 'M5' }
+                        ],
                         optionalServices: [this.serviceUUID]
-                    });
+                    };
+
+                    this.log(`デバイス検索開始: ${this.deviceName}`);
+                    this.device = await navigator.bluetooth.requestDevice(options);
+                    this.log(`デバイス発見: ${this.device.name}`);
 
                     // GATT接続
+                    this.log('GATT接続中...');
                     const server = await this.device.gatt.connect();
+                    this.log('GATT接続成功');
+
+                    // サービス取得
+                    this.log(`サービス取得中: ${this.serviceUUID}`);
                     const service = await server.getPrimaryService(this.serviceUUID);
-                    this.characteristic = await service.getCharacteristic(this.characteristicUUID);
+                    this.log('サービス取得成功');
+
+                    // キャラクタリスティック取得
+                    this.log(`TX特性取得中: ${this.characteristicTXUUID}`);
+                    this.characteristicTX = await service.getCharacteristic(this.characteristicTXUUID);
+                    this.log('TX特性取得成功');
+
+                    this.log(`RX特性取得中: ${this.characteristicRXUUID}`);
+                    this.characteristicRX = await service.getCharacteristic(this.characteristicRXUUID);
+                    this.log('RX特性取得成功');
 
                     // 通知設定
-                    await this.characteristic.startNotifications();
-                    this.characteristic.addEventListener('characteristicvaluechanged', 
+                    this.log('通知設定中...');
+                    await this.characteristicTX.startNotifications();
+                    this.characteristicTX.addEventListener('characteristicvaluechanged', 
                         this.handleNotification.bind(this));
+                    this.log('通知設定成功');
 
                     // 切断イベント
                     this.device.addEventListener('gattserverdisconnected', 
                         this.onDisconnected.bind(this));
 
                     this.isConnected = true;
-                    this.updateStatus('connected', 'BLE接続済み');
+                    this.updateStatus('connected', `${this.device.name}に接続済み`);
                     this.updateBLEButton();
                     this.enableControls(true);
+                    this.log('BLE接続完了');
 
                 } catch (error) {
+                    this.log(`BLE接続エラー: ${error.message}`);
                     console.error('BLE接続エラー:', error);
                     this.updateStatus('error', '接続失敗: ' + error.message);
                     this.updateBLEButton();
@@ -522,6 +592,7 @@
             }
 
             disconnect() {
+                this.log('BLE切断開始');
                 if (this.device && this.device.gatt.connected) {
                     this.device.gatt.disconnect();
                 }
@@ -529,9 +600,11 @@
             }
 
             onDisconnected() {
+                this.log('BLE切断完了');
                 this.isConnected = false;
                 this.device = null;
-                this.characteristic = null;
+                this.characteristicTX = null;
+                this.characteristicRX = null;
                 this.updateStatus('disconnected', 'BLE未接続');
                 this.updateBLEButton();
                 this.enableControls(false);
@@ -575,19 +648,22 @@
             }
 
             async executeCommand(command, buttonType) {
-                if (!this.characteristic || this.isProcessing) return;
+                if (!this.characteristicRX || this.isProcessing) return;
 
                 try {
                     this.isProcessing = true;
                     const button = this.getButtonByType(buttonType);
                     const textElement = this.getTextElementByType(buttonType);
                     
+                    this.log(`コマンド送信: ${command}`);
+                    
                     // ビジュアルフィードバック開始
                     this.startButtonAnimation(button, textElement, buttonType);
                     
-                    // コマンド送信
+                    // 修正: RX特性を使用してコマンド送信
                     const encoder = new TextEncoder();
-                    await this.characteristic.writeValue(encoder.encode(command));
+                    await this.characteristicRX.writeValue(encoder.encode(command));
+                    this.log(`コマンド送信完了: ${command}`);
                     
                     // 100ms待機（1shotボタンの場合）
                     if (buttonType !== 'pause') {
@@ -597,6 +673,7 @@
                     }
                     
                 } catch (error) {
+                    this.log(`コマンド送信エラー: ${error.message}`);
                     console.error('コマンド送信エラー:', error);
                     this.endButtonAnimation(button, textElement, buttonType);
                 }
@@ -643,13 +720,12 @@
             }
 
             startButtonAnimation(button, textElement, type) {
-                if (type === 'pause') return; // ポーズはトグルなので特別処理済み
+                if (type === 'pause') return;
                 
                 button.classList.add('btn-processing');
                 const originalText = textElement.textContent;
                 textElement.textContent = '送信中...';
                 
-                // ボタン一時無効化
                 button.disabled = true;
             }
 
@@ -661,7 +737,6 @@
                 
                 button.classList.remove('btn-processing');
                 
-                // 完了表示
                 const originalText = this.getOriginalButtonText(type);
                 textElement.textContent = '完了';
                 
@@ -684,9 +759,17 @@
             handleNotification(event) {
                 const decoder = new TextDecoder();
                 const data = decoder.decode(event.target.value);
+                this.log(`通知受信: ${data}`);
                 console.log('StamPLCからの通知:', data);
                 
-                // 将来的にはここでStamPLCからのステータス情報を処理
+                // レスポンス処理
+                if (data.includes('COMPLETED')) {
+                    // コマンド完了通知
+                } else if (data.includes('RELAY')) {
+                    // リレー状態通知
+                } else if (data === 'CONNECTED') {
+                    this.log('StamPLCが接続を確認');
+                }
             }
         }
 
