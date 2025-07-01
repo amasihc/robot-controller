@@ -415,10 +415,9 @@
                 this.isPaused = false;
                 this.isProcessing = false;
                 
-                // 修正: UUID設定をArduinoと一致させる
+                // 修正: 元のUUIDに戻す（Arduinoで同じUUIDを使用）
                 this.serviceUUID = '12345678-1234-1234-1234-123456789abc';
-                this.characteristicTXUUID = '87654321-4321-4321-4321-cba987654321';
-                this.characteristicRXUUID = '87654321-4321-4321-4321-cba987654322';
+                this.characteristicUUID = '87654321-4321-4321-4321-cba987654321';
                 this.deviceName = 'StamPLC-MRC01';
                 
                 this.initializeElements();
@@ -557,19 +556,15 @@
                     const service = await server.getPrimaryService(this.serviceUUID);
                     this.log('サービス取得成功');
 
-                    // キャラクタリスティック取得
-                    this.log(`TX特性取得中: ${this.characteristicTXUUID}`);
-                    this.characteristicTX = await service.getCharacteristic(this.characteristicTXUUID);
-                    this.log('TX特性取得成功');
-
-                    this.log(`RX特性取得中: ${this.characteristicRXUUID}`);
-                    this.characteristicRX = await service.getCharacteristic(this.characteristicRXUUID);
-                    this.log('RX特性取得成功');
+                    // 修正: 単一のCharacteristicを使用
+                    this.log(`Characteristic取得中: ${this.characteristicUUID}`);
+                    this.characteristic = await service.getCharacteristic(this.characteristicUUID);
+                    this.log('Characteristic取得成功');
 
                     // 通知設定
                     this.log('通知設定中...');
-                    await this.characteristicTX.startNotifications();
-                    this.characteristicTX.addEventListener('characteristicvaluechanged', 
+                    await this.characteristic.startNotifications();
+                    this.characteristic.addEventListener('characteristicvaluechanged', 
                         this.handleNotification.bind(this));
                     this.log('通知設定成功');
 
@@ -648,7 +643,7 @@
             }
 
             async executeCommand(command, buttonType) {
-                if (!this.characteristicRX || this.isProcessing) return;
+                if (!this.characteristic || this.isProcessing) return;
 
                 try {
                     this.isProcessing = true;
@@ -660,9 +655,9 @@
                     // ビジュアルフィードバック開始
                     this.startButtonAnimation(button, textElement, buttonType);
                     
-                    // 修正: RX特性を使用してコマンド送信
+                    // 修正: 単一のCharacteristicを使用してコマンド送信
                     const encoder = new TextEncoder();
-                    await this.characteristicRX.writeValue(encoder.encode(command));
+                    await this.characteristic.writeValue(encoder.encode(command));
                     this.log(`コマンド送信完了: ${command}`);
                     
                     // 100ms待機（1shotボタンの場合）
