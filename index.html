@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2196F3">
+    
+    <!-- PWA設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Robot Controller">
+    
+    <!-- アイコン設定 -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <title>🤖 Robot Controller</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .container {
+            background: #f0f0f3;
+            border-radius: 30px;
+            box-shadow: 
+                20px 20px 60px #d1d1d4,
+                -20px -20px 60px #ffffff;
+            padding: 40px 30px;
+            max-width: 380px;
+            width: 100%;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .status-bar {
+            background: #f0f0f3;
+            border-radius: 15px;
+            box-shadow: 
+                inset 8px 8px 15px #d1d1d4,
+                inset -8px -8px 15px #ffffff;
+            padding: 15px 20px;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .ble-status {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e74c3c;
+            animation: pulse-red 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #27ae60;
+            animation: pulse-green 2s infinite;
+        }
+
+        .status-indicator.connecting {
+            background: #f39c12;
+            animation: pulse-orange 1s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .btn {
+            background: #f0f0f3;
+            border: none;
+            border-radius: 20px;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 
+                8px 8px 15px #d1d1d4,
+                -8px -8px 15px #ffffff;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 
+                12px 12px 20px #d1d1d4,
+                -12px -12px 20px #ffffff;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 
+                inset 8px 8px 15px #d1d1d4,
+                inset -8px -8px 15px #ffffff;
+        }
+
+        .btn:disabled {
+            color: #95a5a6;
+            cursor: not-allowed;
+            box-shadow: 
+                4px 4px 8px #d1d1d4,
+                -4px -4px 8px #ffffff;
+        }
+
+        .btn-ble {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 
+                8px 8px 15px #d1d1d4,
+                -8px -8px 15px #ffffff,
+                inset 0 0 0 2px rgba(255,255,255,0.1);
+        }
+
+        .btn-ble:hover:not(:disabled) {
+            background: linear-gradient(135deg, #5dade2, #3498db);
+        }
+
+        .btn-ble.connecting {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .btn-ble.connected {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .btn-home {
+            color: #3498db;
+        }
+
+        .btn-start {
+            color: #27ae60;
+        }
+
+        .btn-pause {
+            color: #f39c12;
+        }
+
+        .btn-pause.active {
+            color: #e74c3c;
+            background: #fdf2f2;
+            box-shadow: 
+                inset 8px 8px 15px #f5c6cb,
+                inset -8px -8px 15px #ffffff;
+        }
+
+        .btn-stop {
+            color: #e74c3c;
+        }
+
+        .btn-processing {
+            position: relative;
+        }
+
+        .btn-processing::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0) 0%, 
+                rgba(255,255,255,0.3) 50%, 
+                rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            animation: shimmer 0.8s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-icon {
+            font-size: 22px;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .btn {
+                padding: 18px;
+                font-size: 16px;
+                min-height: 65px;
+            }
+        }
+
+        /* ダークモード対応 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            }
+            
+            .container {
+                background: #34495e;
+                box-shadow: 
+                    20px 20px 60px #2c3e50,
+                    -20px -20px 60px #3c5a78;
+            }
+            
+            .btn {
+                background: #34495e;
+                color: #ecf0f1;
+                box-shadow: 
+                    8px 8px 15px #2c3e50,
+                    -8px -8px 15px #3c5a78;
+            }
+            
+            .btn:hover:not(:disabled) {
+                box-shadow: 
+                    12px 12px 20px #2c3e50,
+                    -12px -12px 20px #3c5a78;
+            }
+            
+            .status-bar {
+                background: #34495e;
+                box-shadow: 
+                    inset 8px 8px 15px #2c3e50,
+                    inset -8px -8px 15px #3c5a78;
+            }
+            
+            .ble-status {
+                color: #ecf0f1;
+            }
+            
+            .header h1 {
+                color: #ecf0f1;
+            }
+        }
+
+        /* アクセシビリティ */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* フォーカス表示 */
+        .btn:focus {
+            outline: 3px solid #3498db;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Robot Controller</h1>
+        </div>
+
+        <div class="status-bar">
+            <div class="ble-status">
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">BLE未接続</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="bleBtn" class="btn btn-ble" aria-label="Bluetooth接続">
+                <span class="btn-icon">🔗</span>
+                <span id="bleBtnText">BLE接続</span>
+            </button>
+
+            <button id="homeBtn" class="btn btn-home" disabled aria-label="原点復帰">
+                <span class="btn-icon">🏠</span>
+                <span id="homeBtnText">原点復帰</span>
+            </button>
+
+            <button id="startBtn" class="btn btn-start" disabled aria-label="運転開始">
+                <span class="btn-icon">▶️</span>
+                <span id="startBtnText">運転開始</span>
+            </button>
+
+            <button id="pauseBtn" class="btn btn-pause" disabled aria-label="ポーズ">
+                <span class="btn-icon">⏸️</span>
+                <span id="pauseBtnText">ポーズ</span>
+            </button>
+
+            <button id="stopBtn" class="btn btn-stop" disabled aria-label="緊急停止">
+                <span class="btn-icon">⏹️</span>
+                <span id="stopBtnText">緊急停止</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        class RobotController {
+            constructor() {
+                this.device = null;
+                this.characteristic = null;
+                this.isConnected = false;
+                this.isPaused = false;
+                this.isProcessing = false;
+                
+                this.serviceUUID = '12345678-1234-1234-1234-123456789abc';
+                this.characteristicUUID = '87654321-4321-4321-4321-cba987654321';
+                this.deviceName = 'StamPLC-MRC01';
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.checkBluetoothSupport();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    statusIndicator: document.getElementById('statusIndicator'),
+                    statusText: document.getElementById('statusText'),
+                    bleBtn: document.getElementById('bleBtn'),
+                    bleBtnText: document.getElementById('bleBtnText'),
+                    homeBtn: document.getElementById('homeBtn'),
+                    homeBtnText: document.getElementById('homeBtnText'),
+                    startBtn: document.getElementById('startBtn'),
+                    startBtnText: document.getElementById('startBtnText'),
+                    pauseBtn: document.getElementById('pauseBtn'),
+                    pauseBtnText: document.getElementById('pauseBtnText'),
+                    stopBtn: document.getElementById('stopBtn'),
+                    stopBtnText: document.getElementById('stopBtnText')
+                };
+            }
+
+            setupEventListeners() {
+                this.elements.bleBtn.addEventListener('click', () => this.toggleBLEConnection());
+                this.elements.homeBtn.addEventListener('click', () => this.executeCommand('HOME', 'home'));
+                this.elements.startBtn.addEventListener('click', () => this.executeCommand('START', 'start'));
+                this.elements.pauseBtn.addEventListener('click', () => this.togglePause());
+                this.elements.stopBtn.addEventListener('click', () => this.executeCommand('STOP', 'stop'));
+
+                // リップルエフェクト
+                document.querySelectorAll('.btn').forEach(btn => {
+                    btn.addEventListener('click', this.createRipple.bind(this));
+                });
+
+                // バイブレーション
+                document.querySelectorAll('.btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (navigator.vibrate && !btn.disabled) {
+                            navigator.vibrate(50);
+                        }
+                    });
+                });
+            }
+
+            checkBluetoothSupport() {
+                if (!navigator.bluetooth) {
+                    this.updateStatus('error', 'このブラウザはWeb Bluetoothをサポートしていません');
+                    this.elements.bleBtn.disabled = true;
+                    this.elements.bleBtnText.textContent = '非対応';
+                }
+            }
+
+            createRipple(event) {
+                if (event.currentTarget.disabled) return;
+                
+                const button = event.currentTarget;
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+                
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                
+                button.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+
+            async toggleBLEConnection() {
+                if (this.isConnected) {
+                    this.disconnect();
+                } else {
+                    await this.connect();
+                }
+            }
+
+            async connect() {
+                try {
+                    this.updateStatus('connecting', 'BLE接続中...');
+                    this.elements.bleBtn.classList.add('connecting');
+                    this.elements.bleBtnText.innerHTML = '<span class="loading-spinner"></span>接続中...';
+                    this.elements.bleBtn.disabled = true;
+
+                    // BLEデバイス検索
+                    this.device = await navigator.bluetooth.requestDevice({
+                        filters: [{ name: this.deviceName }],
+                        optionalServices: [this.serviceUUID]
+                    });
+
+                    // GATT接続
+                    const server = await this.device.gatt.connect();
+                    const service = await server.getPrimaryService(this.serviceUUID);
+                    this.characteristic = await service.getCharacteristic(this.characteristicUUID);
+
+                    // 通知設定
+                    await this.characteristic.startNotifications();
+                    this.characteristic.addEventListener('characteristicvaluechanged', 
+                        this.handleNotification.bind(this));
+
+                    // 切断イベント
+                    this.device.addEventListener('gattserverdisconnected', 
+                        this.onDisconnected.bind(this));
+
+                    this.isConnected = true;
+                    this.updateStatus('connected', 'BLE接続済み');
+                    this.updateBLEButton();
+                    this.enableControls(true);
+
+                } catch (error) {
+                    console.error('BLE接続エラー:', error);
+                    this.updateStatus('error', '接続失敗: ' + error.message);
+                    this.updateBLEButton();
+                }
+            }
+
+            disconnect() {
+                if (this.device && this.device.gatt.connected) {
+                    this.device.gatt.disconnect();
+                }
+                this.onDisconnected();
+            }
+
+            onDisconnected() {
+                this.isConnected = false;
+                this.device = null;
+                this.characteristic = null;
+                this.updateStatus('disconnected', 'BLE未接続');
+                this.updateBLEButton();
+                this.enableControls(false);
+                this.resetPauseState();
+            }
+
+            updateBLEButton() {
+                this.elements.bleBtn.disabled = false;
+                this.elements.bleBtn.classList.remove('connecting', 'connected');
+                
+                if (this.isConnected) {
+                    this.elements.bleBtn.classList.add('connected');
+                    this.elements.bleBtnText.textContent = 'BLE切断';
+                } else {
+                    this.elements.bleBtnText.textContent = 'BLE接続';
+                }
+            }
+
+            updateStatus(state, message) {
+                this.elements.statusText.textContent = message;
+                this.elements.statusIndicator.className = 'status-indicator';
+                
+                if (state === 'connected') {
+                    this.elements.statusIndicator.classList.add('connected');
+                } else if (state === 'connecting') {
+                    this.elements.statusIndicator.classList.add('connecting');
+                }
+            }
+
+            enableControls(enabled) {
+                const controlButtons = [
+                    this.elements.homeBtn,
+                    this.elements.startBtn,
+                    this.elements.pauseBtn,
+                    this.elements.stopBtn
+                ];
+                
+                controlButtons.forEach(btn => {
+                    btn.disabled = !enabled;
+                });
+            }
+
+            async executeCommand(command, buttonType) {
+                if (!this.characteristic || this.isProcessing) return;
+
+                try {
+                    this.isProcessing = true;
+                    const button = this.getButtonByType(buttonType);
+                    const textElement = this.getTextElementByType(buttonType);
+                    
+                    // ビジュアルフィードバック開始
+                    this.startButtonAnimation(button, textElement, buttonType);
+                    
+                    // コマンド送信
+                    const encoder = new TextEncoder();
+                    await this.characteristic.writeValue(encoder.encode(command));
+                    
+                    // 100ms待機（1shotボタンの場合）
+                    if (buttonType !== 'pause') {
+                        setTimeout(() => {
+                            this.endButtonAnimation(button, textElement, buttonType);
+                        }, 100);
+                    }
+                    
+                } catch (error) {
+                    console.error('コマンド送信エラー:', error);
+                    this.endButtonAnimation(button, textElement, buttonType);
+                }
+            }
+
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                
+                if (this.isPaused) {
+                    this.elements.pauseBtn.classList.add('active');
+                    this.elements.pauseBtnText.textContent = 'ポーズ中';
+                    this.executeCommand('PAUSE_ON', 'pause');
+                } else {
+                    this.elements.pauseBtn.classList.remove('active');
+                    this.elements.pauseBtnText.textContent = 'ポーズ';
+                    this.executeCommand('PAUSE_OFF', 'pause');
+                }
+            }
+
+            resetPauseState() {
+                this.isPaused = false;
+                this.elements.pauseBtn.classList.remove('active');
+                this.elements.pauseBtnText.textContent = 'ポーズ';
+            }
+
+            getButtonByType(type) {
+                const buttonMap = {
+                    'home': this.elements.homeBtn,
+                    'start': this.elements.startBtn,
+                    'pause': this.elements.pauseBtn,
+                    'stop': this.elements.stopBtn
+                };
+                return buttonMap[type];
+            }
+
+            getTextElementByType(type) {
+                const textMap = {
+                    'home': this.elements.homeBtnText,
+                    'start': this.elements.startBtnText,
+                    'pause': this.elements.pauseBtnText,
+                    'stop': this.elements.stopBtnText
+                };
+                return textMap[type];
+            }
+
+            startButtonAnimation(button, textElement, type) {
+                if (type === 'pause') return; // ポーズはトグルなので特別処理済み
+                
+                button.classList.add('btn-processing');
+                const originalText = textElement.textContent;
+                textElement.textContent = '送信中...';
+                
+                // ボタン一時無効化
+                button.disabled = true;
+            }
+
+            endButtonAnimation(button, textElement, type) {
+                if (type === 'pause') {
+                    this.isProcessing = false;
+                    return;
+                }
+                
+                button.classList.remove('btn-processing');
+                
+                // 完了表示
+                const originalText = this.getOriginalButtonText(type);
+                textElement.textContent = '完了';
+                
+                setTimeout(() => {
+                    textElement.textContent = originalText;
+                    button.disabled = false;
+                    this.isProcessing = false;
+                }, 500);
+            }
+
+            getOriginalButtonText(type) {
+                const textMap = {
+                    'home': '原点復帰',
+                    'start': '運転開始',
+                    'stop': '緊急停止'
+                };
+                return textMap[type];
+            }
+
+            handleNotification(event) {
+                const decoder = new TextDecoder();
+                const data = decoder.decode(event.target.value);
+                console.log('StamPLCからの通知:', data);
+                
+                // 将来的にはここでStamPLCからのステータス情報を処理
+            }
+        }
+
+        // アプリケーション開始
+        document.addEventListener('DOMContentLoaded', () => {
+            new RobotController();
+        });
+
+        // PWA登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
