@@ -415,7 +415,7 @@
                 this.isPaused = false;
                 this.isProcessing = false;
                 
-                // 修正: 元のUUIDに戻す（Arduinoで同じUUIDを使用）
+                // 最初に動作していた設定に戻す
                 this.serviceUUID = '12345678-1234-1234-1234-123456789abc';
                 this.characteristicUUID = '87654321-4321-4321-4321-cba987654321';
                 this.deviceName = 'StamPLC-MRC01';
@@ -556,7 +556,7 @@
                     const service = await server.getPrimaryService(this.serviceUUID);
                     this.log('サービス取得成功');
 
-                    // 修正: 単一のCharacteristicを使用
+                    // 単一のCharacteristicを使用
                     this.log(`Characteristic取得中: ${this.characteristicUUID}`);
                     this.characteristic = await service.getCharacteristic(this.characteristicUUID);
                     this.log('Characteristic取得成功');
@@ -655,7 +655,7 @@
                     // ビジュアルフィードバック開始
                     this.startButtonAnimation(button, textElement, buttonType);
                     
-                    // 修正: 単一のCharacteristicを使用してコマンド送信
+                    // 単一のCharacteristicを使用してコマンド送信
                     const encoder = new TextEncoder();
                     await this.characteristic.writeValue(encoder.encode(command));
                     this.log(`コマンド送信完了: ${command}`);
