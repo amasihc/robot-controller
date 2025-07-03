@@ -17,7 +17,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     
-    <title>🤖 Robot Controller</title>
+    <title>Robot Controller</title>
     
     <style>
         * {
@@ -28,55 +28,68 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             user-select: none;
+            color: #2c3e50;
         }
 
         .container {
-            background: #f0f0f3;
-            border-radius: 30px;
+            background: #ffffff;
+            border-radius: 24px;
             box-shadow: 
-                20px 20px 60px #d1d1d4,
-                -20px -20px 60px #ffffff;
-            padding: 40px 30px;
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(0, 0, 0, 0.05);
+            padding: 30px 25px;
             max-width: 380px;
             width: 100%;
             position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .project-name {
+            text-align: center;
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .header h1 {
             color: #2c3e50;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin: 0;
             letter-spacing: -0.5px;
         }
 
+        .ble-section {
+            margin-bottom: 20px;
+        }
+
         .status-bar {
-            background: #f0f0f3;
-            border-radius: 15px;
-            box-shadow: 
-                inset 8px 8px 15px #d1d1d4,
-                inset -8px -8px 15px #ffffff;
-            padding: 15px 20px;
-            margin-bottom: 35px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            padding: 12px 18px;
+            margin-bottom: 12px;
             text-align: center;
         }
 
         .ble-status {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: #2c3e50;
+            color: #495057;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -84,52 +97,70 @@
         }
 
         .status-indicator {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #e74c3c;
+            background: #dc3545;
             animation: pulse-red 2s infinite;
         }
 
         .status-indicator.connected {
-            background: #27ae60;
+            background: #28a745;
             animation: pulse-green 2s infinite;
         }
 
         .status-indicator.connecting {
-            background: #f39c12;
-            animation: pulse-orange 1s infinite;
+            background: #ffc107;
+            animation: pulse-yellow 1s infinite;
         }
 
         @keyframes pulse-red {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.9); }
         }
 
         @keyframes pulse-green {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(0.95); }
         }
 
-        @keyframes pulse-orange {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+        @keyframes pulse-yellow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #dee2e6, transparent);
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: #dee2e6;
+            border-radius: 50%;
         }
 
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
 
         .btn {
-            background: #f0f0f3;
-            border: none;
-            border-radius: 20px;
-            padding: 20px;
-            font-size: 18px;
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 16px;
+            padding: 18px 20px;
+            font-size: 20px;
             font-weight: 600;
-            color: #2c3e50;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
@@ -139,76 +170,93 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            box-shadow: 
-                8px 8px 15px #d1d1d4,
-                -8px -8px 15px #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 
-                12px 12px 20px #d1d1d4,
-                -12px -12px 20px #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            border-color: #ced4da;
         }
 
         .btn:active:not(:disabled) {
             transform: translateY(0);
-            box-shadow: 
-                inset 8px 8px 15px #d1d1d4,
-                inset -8px -8px 15px #ffffff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
         }
 
         .btn:disabled {
-            color: #95a5a6;
+            color: #adb5bd;
             cursor: not-allowed;
-            box-shadow: 
-                4px 4px 8px #d1d1d4,
-                -4px -4px 8px #ffffff;
+            background: #f8f9fa;
+            border-color: #f1f3f4;
+            box-shadow: none;
         }
 
         .btn-ble {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
-            box-shadow: 
-                8px 8px 15px #d1d1d4,
-                -8px -8px 15px #ffffff,
-                inset 0 0 0 2px rgba(255,255,255,0.1);
+            border: 2px solid #007bff;
         }
 
         .btn-ble:hover:not(:disabled) {
-            background: linear-gradient(135deg, #5dade2, #3498db);
+            background: linear-gradient(135deg, #0069d9, #004085);
+            border-color: #0056b3;
         }
 
         .btn-ble.connecting {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            border-color: #ffc107;
         }
 
         .btn-ble.connected {
-            background: linear-gradient(135deg, #27ae60, #229954);
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            border-color: #28a745;
         }
 
         .btn-home {
-            color: #3498db;
+            color: #007bff;
+            border-color: #b3d7ff;
+        }
+
+        .btn-home:hover:not(:disabled) {
+            background: #f0f8ff;
+            border-color: #007bff;
         }
 
         .btn-start {
-            color: #27ae60;
+            color: #28a745;
+            border-color: #b8e6c1;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            background: #f0fff4;
+            border-color: #28a745;
         }
 
         .btn-pause {
-            color: #f39c12;
+            color: #ffc107;
+            border-color: #ffeaa7;
+        }
+
+        .btn-pause:hover:not(:disabled) {
+            background: #fffbf0;
+            border-color: #ffc107;
         }
 
         .btn-pause.active {
-            color: #e74c3c;
-            background: #fdf2f2;
-            box-shadow: 
-                inset 8px 8px 15px #f5c6cb,
-                inset -8px -8px 15px #ffffff;
+            color: #dc3545;
+            background: #fff5f5;
+            border-color: #dc3545;
         }
 
         .btn-stop {
-            color: #e74c3c;
+            color: #dc3545;
+            border-color: #f5c2c7;
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            background: #fff5f5;
+            border-color: #dc3545;
         }
 
         .btn-processing {
@@ -224,7 +272,7 @@
             bottom: 0;
             background: linear-gradient(90deg, 
                 rgba(255,255,255,0) 0%, 
-                rgba(255,255,255,0.3) 50%, 
+                rgba(255,255,255,0.4) 50%, 
                 rgba(255,255,255,0) 100%);
             transform: translateX(-100%);
             animation: shimmer 0.8s ease-in-out;
@@ -238,7 +286,7 @@
         .ripple {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.5);
             transform: scale(0);
             animation: ripple-animation 0.6s linear;
         }
@@ -251,10 +299,10 @@
         }
 
         .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid #ffffff;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid #ffffff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -265,26 +313,14 @@
         }
 
         .btn-icon {
-            font-size: 22px;
+            font-size: 20px;
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
-        }
-
-        .debug-log {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
         }
 
         /* Responsive Design */
         @media (max-width: 480px) {
             .container {
-                padding: 30px 20px;
+                padding: 25px 20px;
                 margin: 10px;
             }
             
@@ -293,52 +329,95 @@
             }
             
             .btn {
-                padding: 18px;
-                font-size: 16px;
+                padding: 16px 18px;
+                font-size: 18px;
                 min-height: 65px;
+            }
+
+            .btn-icon {
+                font-size: 18px;
             }
         }
 
         /* ダークモード対応 */
         @media (prefers-color-scheme: dark) {
             body {
-                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+                background: linear-gradient(135deg, #1a1a1a 0%, #2d3748 100%);
+                color: #e2e8f0;
             }
             
             .container {
-                background: #34495e;
+                background: #2d3748;
+                border: 1px solid #4a5568;
                 box-shadow: 
-                    20px 20px 60px #2c3e50,
-                    -20px -20px 60px #3c5a78;
+                    0 8px 32px rgba(0, 0, 0, 0.3),
+                    0 1px 2px rgba(0, 0, 0, 0.2);
             }
-            
-            .btn {
-                background: #34495e;
-                color: #ecf0f1;
-                box-shadow: 
-                    8px 8px 15px #2c3e50,
-                    -8px -8px 15px #3c5a78;
-            }
-            
-            .btn:hover:not(:disabled) {
-                box-shadow: 
-                    12px 12px 20px #2c3e50,
-                    -12px -12px 20px #3c5a78;
-            }
-            
-            .status-bar {
-                background: #34495e;
-                box-shadow: 
-                    inset 8px 8px 15px #2c3e50,
-                    inset -8px -8px 15px #3c5a78;
-            }
-            
-            .ble-status {
-                color: #ecf0f1;
+
+            .project-name {
+                color: #a0aec0;
             }
             
             .header h1 {
-                color: #ecf0f1;
+                color: #e2e8f0;
+            }
+
+            .status-bar {
+                background: #4a5568;
+                border-color: #718096;
+            }
+
+            .ble-status {
+                color: #e2e8f0;
+            }
+
+            .section-divider {
+                background: linear-gradient(90deg, transparent, #718096, transparent);
+            }
+
+            .section-divider::before {
+                background: #718096;
+            }
+            
+            .btn {
+                background: #4a5568;
+                border-color: #718096;
+                color: #e2e8f0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .btn:hover:not(:disabled) {
+                background: #5a6578;
+                border-color: #8190a0;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            }
+
+            .btn:disabled {
+                background: #2d3748;
+                color: #718096;
+                border-color: #4a5568;
+            }
+
+            .btn-home:hover:not(:disabled) {
+                background: #2c5aa0;
+            }
+
+            .btn-start:hover:not(:disabled) {
+                background: #2f855a;
+            }
+
+            .btn-pause:hover:not(:disabled) {
+                background: #d69e2e;
+            }
+
+            .btn-pause.active {
+                background: #742a2a;
+                border-color: #e53e3e;
+                color: #fed7d7;
+            }
+
+            .btn-stop:hover:not(:disabled) {
+                background: #c53030;
             }
         }
 
@@ -353,30 +432,36 @@
 
         /* フォーカス表示 */
         .btn:focus {
-            outline: 3px solid #3498db;
+            outline: 3px solid #007bff;
             outline-offset: 2px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="project-name">abcdefghijklmn</div>
+        
         <div class="header">
-            <h1>🤖 Robot Controller</h1>
+            <h1>Robot Controller</h1>
         </div>
 
-        <div class="status-bar">
-            <div class="ble-status">
-                <span class="status-indicator" id="statusIndicator"></span>
-                <span id="statusText">BLE未接続</span>
+        <div class="ble-section">
+            <div class="status-bar">
+                <div class="ble-status">
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    <span id="statusText">BLE未接続</span>
+                </div>
             </div>
-        </div>
 
-        <div class="controls">
             <button id="bleBtn" class="btn btn-ble" aria-label="Bluetooth接続">
                 <span class="btn-icon">🔗</span>
                 <span id="bleBtnText">BLE接続</span>
             </button>
+        </div>
 
+        <div class="section-divider"></div>
+
+        <div class="controls">
             <button id="homeBtn" class="btn btn-home" disabled aria-label="原点復帰">
                 <span class="btn-icon">🏠</span>
                 <span id="homeBtnText">原点復帰</span>
@@ -397,25 +482,17 @@
                 <span id="stopBtnText">停止</span>
             </button>
         </div>
-
-        <!-- デバッグ用ログ表示 -->
-        <div class="debug-log" id="debugLog" style="display: none;">
-            <div><strong>デバッグログ:</strong></div>
-            <div id="logContent"></div>
-        </div>
     </div>
 
     <script>
         class RobotController {
             constructor() {
                 this.device = null;
-                this.characteristicTX = null;
-                this.characteristicRX = null;
+                this.characteristic = null;
                 this.isConnected = false;
                 this.isPaused = false;
                 this.isProcessing = false;
                 
-                // 最初に動作していた設定に戻す
                 this.serviceUUID = '12345678-1234-1234-1234-123456789abc';
                 this.characteristicUUID = '87654321-4321-4321-4321-cba987654321';
                 this.deviceName = 'StamPLC-MRC01';
@@ -423,7 +500,6 @@
                 this.initializeElements();
                 this.setupEventListeners();
                 this.checkBluetoothSupport();
-                this.setupDebugMode();
             }
 
             initializeElements() {
@@ -439,9 +515,7 @@
                     pauseBtn: document.getElementById('pauseBtn'),
                     pauseBtnText: document.getElementById('pauseBtnText'),
                     stopBtn: document.getElementById('stopBtn'),
-                    stopBtnText: document.getElementById('stopBtnText'),
-                    debugLog: document.getElementById('debugLog'),
-                    logContent: document.getElementById('logContent')
+                    stopBtnText: document.getElementById('stopBtnText')
                 };
             }
 
@@ -457,32 +531,17 @@
                     btn.addEventListener('click', this.createRipple.bind(this));
                 });
 
-                // バイブレーション
-                document.querySelectorAll('.btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        if (navigator.vibrate && !btn.disabled) {
-                            navigator.vibrate(50);
-                        }
-                    });
-                });
+                // バイブレーション（修正版）
+                this.elements.homeBtn.addEventListener('click', () => this.vibrate(50));
+                this.elements.startBtn.addEventListener('click', () => this.vibrate(50));
+                this.elements.pauseBtn.addEventListener('click', () => this.vibrate(100));
+                this.elements.stopBtn.addEventListener('click', () => this.vibrate(50));
             }
 
-            setupDebugMode() {
-                // URLにdebug=1がある場合、デバッグモードを有効化
-                if (window.location.search.includes('debug=1')) {
-                    this.elements.debugLog.style.display = 'block';
-                    this.debugMode = true;
-                    this.log('デバッグモード有効');
+            vibrate(duration) {
+                if (navigator.vibrate) {
+                    navigator.vibrate(duration);
                 }
-            }
-
-            log(message) {
-                if (this.debugMode) {
-                    const timestamp = new Date().toLocaleTimeString();
-                    this.elements.logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
-                    this.elements.logContent.scrollTop = this.elements.logContent.scrollHeight;
-                }
-                console.log(`[RobotController] ${message}`);
             }
 
             checkBluetoothSupport() {
@@ -490,7 +549,6 @@
                     this.updateStatus('error', 'このブラウザはWeb Bluetoothをサポートしていません');
                     this.elements.bleBtn.disabled = true;
                     this.elements.bleBtnText.textContent = '非対応';
-                    this.log('Web Bluetooth非対応');
                 }
             }
 
@@ -530,9 +588,7 @@
                     this.elements.bleBtn.classList.add('connecting');
                     this.elements.bleBtnText.innerHTML = '<span class="loading-spinner"></span>接続中...';
                     this.elements.bleBtn.disabled = true;
-                    this.log('BLE接続開始');
 
-                    // 修正: より広範囲な検索オプション
                     const options = {
                         filters: [
                             { name: this.deviceName },
@@ -542,33 +598,16 @@
                         optionalServices: [this.serviceUUID]
                     };
 
-                    this.log(`デバイス検索開始: ${this.deviceName}`);
                     this.device = await navigator.bluetooth.requestDevice(options);
-                    this.log(`デバイス発見: ${this.device.name}`);
 
-                    // GATT接続
-                    this.log('GATT接続中...');
                     const server = await this.device.gatt.connect();
-                    this.log('GATT接続成功');
-
-                    // サービス取得
-                    this.log(`サービス取得中: ${this.serviceUUID}`);
                     const service = await server.getPrimaryService(this.serviceUUID);
-                    this.log('サービス取得成功');
-
-                    // 単一のCharacteristicを使用
-                    this.log(`Characteristic取得中: ${this.characteristicUUID}`);
                     this.characteristic = await service.getCharacteristic(this.characteristicUUID);
-                    this.log('Characteristic取得成功');
 
-                    // 通知設定
-                    this.log('通知設定中...');
                     await this.characteristic.startNotifications();
                     this.characteristic.addEventListener('characteristicvaluechanged', 
                         this.handleNotification.bind(this));
-                    this.log('通知設定成功');
 
-                    // 切断イベント
                     this.device.addEventListener('gattserverdisconnected', 
                         this.onDisconnected.bind(this));
 
@@ -576,10 +615,8 @@
                     this.updateStatus('connected', `${this.device.name}に接続済み`);
                     this.updateBLEButton();
                     this.enableControls(true);
-                    this.log('BLE接続完了');
 
                 } catch (error) {
-                    this.log(`BLE接続エラー: ${error.message}`);
                     console.error('BLE接続エラー:', error);
                     this.updateStatus('error', '接続失敗: ' + error.message);
                     this.updateBLEButton();
@@ -587,7 +624,6 @@
             }
 
             disconnect() {
-                this.log('BLE切断開始');
                 if (this.device && this.device.gatt.connected) {
                     this.device.gatt.disconnect();
                 }
@@ -595,11 +631,9 @@
             }
 
             onDisconnected() {
-                this.log('BLE切断完了');
                 this.isConnected = false;
                 this.device = null;
-                this.characteristicTX = null;
-                this.characteristicRX = null;
+                this.characteristic = null;
                 this.updateStatus('disconnected', 'BLE未接続');
                 this.updateBLEButton();
                 this.enableControls(false);
@@ -650,28 +684,21 @@
                     const button = this.getButtonByType(buttonType);
                     const textElement = this.getTextElementByType(buttonType);
                     
-                    this.log(`コマンド送信: ${command}`);
-                    
-                    // ビジュアルフィードバック開始
                     this.startButtonAnimation(button, textElement, buttonType);
                     
-                    // 単一のCharacteristicを使用してコマンド送信
                     const encoder = new TextEncoder();
                     await this.characteristic.writeValue(encoder.encode(command));
-                    this.log(`コマンド送信完了: ${command}`);
                     
-                    // パルス制御の場合は100ms後に完了処理
+                    // パルス制御の場合は150ms後に完了処理
                     if (buttonType !== 'pause') {
                         setTimeout(() => {
                             this.endButtonAnimation(button, textElement, buttonType);
-                        }, 150); // 100ms パルス + 余裕50ms
+                        }, 150);
                     } else {
-                        // ポーズはトグルなので即座に完了
                         this.isProcessing = false;
                     }
                     
                 } catch (error) {
-                    this.log(`コマンド送信エラー: ${error.message}`);
                     console.error('コマンド送信エラー:', error);
                     this.endButtonAnimation(button, textElement, buttonType);
                 }
@@ -729,14 +756,12 @@
 
             endButtonAnimation(button, textElement, type) {
                 if (type === 'pause') {
-                    // ポーズボタンはトグルなので特別処理
                     this.isProcessing = false;
                     return;
                 }
                 
                 button.classList.remove('btn-processing');
                 
-                // パルス送信完了表示（100ms）
                 const originalText = this.getOriginalButtonText(type);
                 textElement.textContent = '送信完了';
                 
@@ -744,7 +769,7 @@
                     textElement.textContent = originalText;
                     button.disabled = false;
                     this.isProcessing = false;
-                }, 300); // 短縮
+                }, 300);
             }
 
             getOriginalButtonText(type) {
@@ -759,17 +784,7 @@
             handleNotification(event) {
                 const decoder = new TextDecoder();
                 const data = decoder.decode(event.target.value);
-                this.log(`通知受信: ${data}`);
                 console.log('StamPLCからの通知:', data);
-                
-                // レスポンス処理
-                if (data.includes('COMPLETED')) {
-                    // コマンド完了通知
-                } else if (data.includes('RELAY')) {
-                    // リレー状態通知
-                } else if (data === 'CONNECTED') {
-                    this.log('StamPLCが接続を確認');
-                }
             }
         }
 
