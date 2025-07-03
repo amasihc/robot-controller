@@ -439,7 +439,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="project-name">NISSETSUKO.CO.LTD</div>
+        <div class="project-name">abcdefghijklmn</div>
         
         <div class="header">
             <h1>Robot Controller</h1>
@@ -765,11 +765,20 @@
                 const originalText = this.getOriginalButtonText(type);
                 textElement.textContent = '送信完了';
                 
+                // すぐにボタンを有効化
                 setTimeout(() => {
                     textElement.textContent = originalText;
                     button.disabled = false;
                     this.isProcessing = false;
                 }, 300);
+                
+                // 3秒後に強制的にリセット（色を元に戻す）
+                setTimeout(() => {
+                    button.classList.remove('btn-processing');
+                    textElement.textContent = originalText;
+                    button.disabled = false;
+                    this.isProcessing = false;
+                }, 3000);
             }
 
             getOriginalButtonText(type) {
