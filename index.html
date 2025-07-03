@@ -392,9 +392,9 @@
                 <span id="pauseBtnText">ポーズ</span>
             </button>
 
-            <button id="stopBtn" class="btn btn-stop" disabled aria-label="緊急停止">
+            <button id="stopBtn" class="btn btn-stop" disabled aria-label="停止">
                 <span class="btn-icon">⏹️</span>
-                <span id="stopBtnText">緊急停止</span>
+                <span id="stopBtnText">停止</span>
             </button>
         </div>
 
@@ -660,11 +660,14 @@
                     await this.characteristic.writeValue(encoder.encode(command));
                     this.log(`コマンド送信完了: ${command}`);
                     
-                    // 100ms待機（1shotボタンの場合）
+                    // パルス制御の場合は100ms後に完了処理
                     if (buttonType !== 'pause') {
                         setTimeout(() => {
                             this.endButtonAnimation(button, textElement, buttonType);
-                        }, 100);
+                        }, 150); // 100ms パルス + 余裕50ms
+                    } else {
+                        // ポーズはトグルなので即座に完了
+                        this.isProcessing = false;
                     }
                     
                 } catch (error) {
@@ -726,27 +729,29 @@
 
             endButtonAnimation(button, textElement, type) {
                 if (type === 'pause') {
+                    // ポーズボタンはトグルなので特別処理
                     this.isProcessing = false;
                     return;
                 }
                 
                 button.classList.remove('btn-processing');
                 
+                // パルス送信完了表示（100ms）
                 const originalText = this.getOriginalButtonText(type);
-                textElement.textContent = '完了';
+                textElement.textContent = '送信完了';
                 
                 setTimeout(() => {
                     textElement.textContent = originalText;
                     button.disabled = false;
                     this.isProcessing = false;
-                }, 500);
+                }, 300); // 短縮
             }
 
             getOriginalButtonText(type) {
                 const textMap = {
                     'home': '原点復帰',
                     'start': '運転開始',
-                    'stop': '緊急停止'
+                    'stop': '停止'
                 };
                 return textMap[type];
             }
