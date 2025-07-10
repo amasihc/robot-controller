@@ -2,12 +2,12 @@
   "name": "Robot Controller - StamPLC",
   "short_name": "RobotCtrl",
   "description": "StamPLC経由でロボットをBLE制御するアプリ",
-  "start_url": "/",
+  "start_url": "/robot-controller/",
   "display": "standalone",
   "background_color": "#f0f0f3",
   "theme_color": "#2196F3",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "/robot-controller/",
   "lang": "ja",
   "icons": [
     {
