@@ -1,16 +1,12 @@
-const CACHE_NAME = 'robot-controller-v1.0.0';
+const CACHE_NAME = 'robot-controller-v1.1.0';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icons/icon-72x72.png',
-  '/icons/icon-96x96.png',
-  '/icons/icon-128x128.png',
-  '/icons/icon-144x144.png',
-  '/icons/icon-152x152.png',
-  '/icons/icon-192x192.png',
-  '/icons/icon-384x384.png',
-  '/icons/icon-512x512.png'
+  '/icon-16x16.png',
+  '/icon-32x32.png',
+  '/icon-192x192.png',
+  '/icon-512x512.png'
 ];
 
 // インストール時
@@ -106,7 +102,7 @@ self.addEventListener('fetch', (event) => {
 // キャッシュすべきリソースかどうかを判定
 function shouldCache(url) {
   const cacheableExtensions = ['.html', '.css', '.js', '.png', '.jpg', '.svg', '.ico'];
-  const cacheablePatterns = ['/icons/', '/manifest.json'];
+  const cacheablePatterns = ['/manifest.json'];
   
   return cacheableExtensions.some(ext => url.endsWith(ext)) ||
          cacheablePatterns.some(pattern => url.includes(pattern));
@@ -148,15 +144,15 @@ self.addEventListener('push', (event) => {
     const data = event.data.json();
     const options = {
       body: data.body || 'ロボットからの通知',
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-72x72.png',
+      icon: '/icon-192x192.png',
+      badge: '/icon-192x192.png',
       vibrate: [200, 100, 200],
       data: data,
       actions: [
         {
           action: 'view',
           title: '確認',
-          icon: '/icons/icon-72x72.png'
+          icon: '/icon-192x192.png'
         },
         {
           action: 'close',
