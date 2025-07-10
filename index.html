@@ -53,11 +53,22 @@
 
         .project-name {
             text-align: center;
-            font-size: 14px;
+            font-size: 26px; /* Robot Controllerと同じサイズ */
             color: #6c757d;
-            font-weight: 500;
+            font-weight: 700; /* 太字 */
             margin-bottom: 8px;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .project-icon {
+            width: 26px; /* 画像の幅 */
+            height: 26px; /* 画像の高さ */
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+            object-fit: contain; /* 画像の縦横比を保持 */
         }
 
         .header {
@@ -324,6 +335,15 @@
                 margin: 10px;
             }
             
+            .project-name {
+                font-size: 24px; /* Robot Controllerと同じサイズ */
+            }
+            
+            .project-icon {
+                width: 24px; /* モバイル用サイズ */
+                height: 24px;
+            }
+            
             .header h1 {
                 font-size: 24px;
             }
@@ -355,7 +375,7 @@
             }
 
             .project-name {
-                color: #a0aec0;
+                color: #e2e8f0; /* ダークモードでは明るい色に */
             }
             
             .header h1 {
@@ -439,7 +459,10 @@
 </head>
 <body>
     <div class="container">
-        <div class="project-name">NISSETSUKO.CO.LTD</div>
+        <div class="project-name">
+            <img src="icons/icon-32x32.png" alt="Nロゴ" class="project-icon">
+            NISSETSUKO.CO.LTD
+        </div>
         
         <div class="header">
             <h1>Robot Controller</h1>
