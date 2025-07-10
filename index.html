@@ -69,6 +69,9 @@
             height: 26px; /* 画像の高さ */
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
             object-fit: contain; /* 画像の縦横比を保持 */
+            border-radius: 50%; /* 円形にして白背景を目立たなくする */
+            background: linear-gradient(135deg, #2196F3, #1976D2); /* 青いグラデーション背景 */
+            padding: 2px; /* 少し余白を追加 */
         }
 
         .header {
@@ -337,11 +340,13 @@
             
             .project-name {
                 font-size: 24px; /* Robot Controllerと同じサイズ */
+                gap: 12px; /* アイコンとテキストの間隔を広く */
             }
             
             .project-icon {
-                width: 24px; /* モバイル用サイズ */
-                height: 24px;
+                width: 32px; /* モバイル用サイズを大きく */
+                height: 32px;
+                padding: 3px; /* 余白も少し大きく */
             }
             
             .header h1 {
@@ -460,7 +465,8 @@
 <body>
     <div class="container">
         <div class="project-name">
-            <img src="./icon-32x32.png" alt="Nロゴ" class="project-icon">
+            <img src="./icon-32x32.png" alt="Nロゴ" class="project-icon" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+            <span class="project-icon" style="display:none;">🏭</span>
             NISSETSUKO.CO.LTD
         </div>
         
