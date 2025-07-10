@@ -1,12 +1,12 @@
-const CACHE_NAME = 'robot-controller-v1.1.0';
+const CACHE_NAME = 'robot-controller-v1.2.0';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-16x16.png',
-  '/icon-32x32.png',
-  '/icon-192x192.png',
-  '/icon-512x512.png'
+  '/robot-controller/',
+  '/robot-controller/index.html',
+  '/robot-controller/manifest.json',
+  '/robot-controller/icon-16x16.png',
+  '/robot-controller/icon-32x32.png',
+  '/robot-controller/icon-192x192.png',
+  '/robot-controller/icon-512x512.png'
 ];
 
 // インストール時
@@ -90,7 +90,7 @@ self.addEventListener('fetch', (event) => {
             
             // オフライン時のフォールバック
             if (event.request.destination === 'document') {
-              return caches.match('/index.html');
+              return caches.match('/robot-controller/index.html');
             }
             
             throw error;
@@ -144,15 +144,15 @@ self.addEventListener('push', (event) => {
     const data = event.data.json();
     const options = {
       body: data.body || 'ロボットからの通知',
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
+      icon: '/robot-controller/icon-192x192.png',
+      badge: '/robot-controller/icon-192x192.png',
       vibrate: [200, 100, 200],
       data: data,
       actions: [
         {
           action: 'view',
           title: '確認',
-          icon: '/icon-192x192.png'
+          icon: '/robot-controller/icon-192x192.png'
         },
         {
           action: 'close',
